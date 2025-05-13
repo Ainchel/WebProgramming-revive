@@ -287,7 +287,7 @@ FROM customer;
 
 MySQL 워크벤치에서는 Schemas 탭에서 열 정보를 확인할 수 있다.
 
-# WHERE 절로 조건에 맞는 데이터 조회하기 (114 페이지 ~ 125 페이지) 진행 중
+# WHERE 절로 조건에 맞는 데이터 조회하기 (114 페이지 ~ 127 페이지) 진행 중
 
 WHERE절을 활용하면 필요한 데이터만 조건을 걸어 조회할 수 있다. WHERE 절의 기본 형식은 아래와 같다.
 
@@ -322,5 +322,107 @@ OR이나 AND 연산자를 섞을 경우, AND를 먼저 끼고 묶어 원하는 �
 SELECT * FROM city WHERE country_id = 103 OR country_id = 86 AND city IN ('Cheju', 'Sunnyvale', 'Dallas') <- 이렇게 적으면 country_id = 86 이 뒤의 AND에 묶이게 된다.
 SELECT * FROM city WHERE (country_id = 103 OR country_id = 86) AND city IN ('Cheju', 'Sunnyvale', 'Dallas') <- country_id끼리를 소괄호로 묶어 OR 연산자 범위를 적절하게 바꾸어주었다.
 SELECT * FROM city WHERE country_id IN (103, 86) AND city IN ('Cheju', 'Sunnyvale', 'Dallas') <- 아니면 이렇게 IN으로 묶어줘도 된다.
+```
+
+NULL 값은 숫자 0이나 공백 같은 게 아닌, 데이터가 들어가 있지 않은 상태를 가리킨다. NULL은 = 연산자로 조회할 수 없다. IS NULL, IS NOT NULL로 조회해야 한다.
+
+거꾸로 공백 값은 NULL이 아니라 = 연산자로 조회해야 하며, 따옴표 사이에 아무 것도 없는 '' 값으로 조회할 수 있다. 예시) WHERE address2 = '';
+
+# ORDER BY 절로 데이터 정렬하기 (128 페이지 ~ 133 페이지) 진행 중
+
+ORDER BY 절을 이용하면 조회한 데이터를 정렬시킬 수 있다. SELECT 문의 가장 마지막에 ORDER BY 절을 추가한다.
+
+```
+SELECT 열 FROM 테이블 WHERE 열 = 조건값 ORDER BY 열 ASC또는DESC (ASC는 오름차순, DESC는 내림차순이다)
+SELECT * FROM customer ORDER BY last_name;
+SELECT * FROM customer ORDER BY store_id, first_name;
+```
+
+특정 데이터 중에서 상위 N개의 데이터만 조회하고 싶을 경우 LIMIT을 사용한다. ORDER BY 뒤에 LIMIT 숫자 형식으로 개수를 지정한다.
+
+```
+SELECT * FROM customer ORDER BY store_id DESC, first_name ASC LIMIT 10;
+```
+
+LIMIT 뒤에 매개변수를 2개 입력하면 시작 값과 시작 값부터의 N개 데이터를 조회할 수 있다.
+
+```
+SELECT * FROM customer ORDER BY customer_id ASC, LIMIT 100, 10;
+```
+
+OFFSET을 지정하면 해당 수만큼 건너뛴 다음부터 지정한 개수를 센다. OFFSET은 반드시 LIMIT과 함께 사용한다.
+
+```
+SELECT * FROM customer ORDER BY customer_id ASC LIMIT 10 OFFSET 100;
+```
+
+# 와일드카드로 문자열 조회하기(134 페이지 ~ 144페이지) 진행 중
+
+LIKE 구문을 사용하면 와일드카드로 지정한 패턴과 일치하는 문자열, 날짜, 시간 등을 조회할 수 있다. 기본 형식은 아래와 같다.
+
+```
+SELECT 열 FROM 테이블 WHERE 열 LIKE 와일드카드조건값
+```
+
+특정 문자열을 포함하는 문자열을 조회하는 와일드카드는 %를 사용한다. % 위치에 따라 특정 문자열이 포함된 문자열을 조회할 수 있다.
+
+특정 문자열을 제외하고 조회하고 싶다면 NOT을 조합한다.
+
+```
+A% : A로 시작하는 모든 문자열
+%A : A로 끝나는 모든 문자열
+%A% : A가 포함된 모든 문자열
+
+SELECT * FROM customer WHERE first_name LIKE 'A%'; << A로 시작하는 모든 문자열 조회
+SELECT * FROM customer WHERE first_name NOT LIKE 'A%'; << A로 시작하지 않는 모든 문자열 조회
+```
+
+%는 예약어(프로그래밍 언어에서 문법으로 취급하는 문자)이므로 %를 문자 자체로 인식시키려면 ESCAPE를 사용해야 한다.
+
+문자로 취급시키는 ESCAPE를 지정하려면 쿼리문 마지막에 ESCAPE를 붙인다. #를 ESCAPE로 지정하려면 문자로 취급하려면 ESCAPE를 '#' 를 붙여준다.
+
+```
+SELECT * FROM CTE WHERE col_1 LIKE '%#%%' ESCAPE '#'; << 이 경우 2번째 %는 문자로 인식된다. 처음과 마지막 %는 예약어로 인식된다.
+```
+
+특정 문자열에 길이까지 지정하려면 _를 사용한다. %와_를 섞으면 복잡한 문자열 데이터를 조회할 수 있다. 
+
+```
+A_ : A로 시작하는 2글자짜리 문자열
+_A : A로 끝나는 2글자짜리 문자열
+_A_ : 중간에 A가 들어가는 3글자짜리 문자열
+
+SELECT * FROM customer WHERE first_name LIKE 'A_';
+SELECT * FROM customer WHERE first_name LIKE '_____'; << _만 사용하면 해당 글자수의 문자열만 자동으로 찾는다. 이건 5개짜리.
+```
+
+정규 표현식을 의미하는 REGEXP를 사용하면 더 다양한 방법으로 문자열을 검색할 수 있다. 나중에 찾아보자.
+
+# GROUP BY 절로 데이터 묶기
+
+데이터를 그룹화할 떄에는 GROUP BY를 사용한다. 그룹화는 특정 연산에 앞서 연산할 대상을 지정하거나, 현재 테이블에 들어가있는 각 행의 데이터 종류(즉 열에 어떤 값들이 지정되어 있는지)를 확인하는 데 사용할 수 있다.
+
+```
+SELECT special_features FROM film GROUP BY special_features;
+```
+
+COUNT 함수를 사용하면 그룹화시킨 데이터 항목들의 개수를 세어볼 수 있다.
+
+```
+SELECT special_features, COUNT(*) AS cnt FROM film GROUP BY special_features; << 이러면 cnt라는 이름의 열로 각 데이터 개수를 표시해준다.
+```
+
+GROUP BY 구문을 사용할 경우, SELECT로 지정한 열들을 반드시 GROUP BY에도 적어줘야 한다(규칙처럼 생각하기). 기준이 될 열이 필요하기 때문이라고 한다. (지금은 잘 모르겠어서 나중에 더 찾아보기)
+
+GROUP BY로 그룹화한 데이터를 필터링 하려면 HAVING 절을 사용해야 한다. HAVING 절은 SELECT로 조회한 열, GROUP BY로 그룹화한 열에만 필터링을 적용할 수 있다. 그룹화하지 않으면 오류가 발생한다.
+
+```
+SELECT special_features, rating FROM film
+GROUP BY spcial_features, rating
+HAVING rating = 'G';
+```
+
+GROUP BY 절을 사용하지 않고 중복 데이터를 제거하고 싶다면 DISTINCT를 사용할 수 있다.
+```SELECT DISTIㅇI
 ```
 
