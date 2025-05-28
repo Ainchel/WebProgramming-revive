@@ -1,4 +1,4 @@
-1. SSO란 무엇인가?
+# 1. SSO란 무엇인가?
 
 SSO란 Single Sign-On의 줄임말로, 한 번의 로그인으로 여러 서비스에 접근할 수 있도록 해주는 인증 방식이다.
 
@@ -9,3 +9,91 @@ SSO란 Single Sign-On의 줄임말로, 한 번의 로그인으로 여러 서비�
 한 번의 로그인 인증 상태를 공유하며 다양한 서비스로 연계할 수 있으므로, 카카오/네이버 등 타 플랫폼을 통해 로그인하면 해당 인증을 유지하면서 우리 서비스로 바로 연계할 수 있게 되는 것이다.
 
 ** SSO는 특정 기술이 아닌 패턴이자 설계에 가깝다. 이 설계를 구현하기 위한 도구가 Oauth2인 것이다.
+
+# 2. 그렇다면 Oauth2란 무엇인가?
+
+Oauth2.0이란 사용자의 비밀번호를 노출하지 않고, 제3자 서비스가 사용자 자원(정보)에 접근할 수 있게 해주는 표준 프로토콜이다. 이 프로토콜을 거치면 사용자의 비밀번호는 전혀 사용하지 않고, 접근 권한(Access Token)을 통해 다른 서비스의 정보를 허용된 만큼만 볼 수 있게 해준다.
+Oauth2를 이용하면 비밀번호라는 중요 정보 없이, 사용자가 직접 허용한 범위 내에서, 시간 제한과 범위 제한을 가진 안전한 권한을 이용해 서비스 간 정보를 주고받을 수 있다.
+
+예시) 사용자가 우리의 서비스에 로그인하려고 할 때, 우리 측에 정보를 제공하여 회원가입을 하지 않고도 카카오로 로그인할 수 있다.
+
+```
+1. 우리의 서비스에서 카카오 쪽에 사용자 인증을 요청한다.
+2. 사용자에게 카카오 측의 동의 화면을 제공
+3. 사용자가 동의했을 경우, Access Token을 발행
+4. Access Token을 이용해 사용자의 이메일과 이름 등을 카카오 측에 요청
+5. 받아온 정보로 우리 서비스의 회원 가입과 로그인 등을 처리한다.
+```
+
+** 프로토콜이란? 사람이 서로 의사소통을 하기 위해 언어와 문법이 필요한 것처럼, 컴퓨터나 시스템도 서로 정보를 주고 받기 위해 정해진 방식이 필요하다. 이를 프로토콜이라고 한다. 대표적인 것이 웹페이지를 주고받기 위한 규칙인 HTTP, 인터넷 상에서 데이터를 주고 받기 위한 TCP/IP가 있다. Oauth2 역시 인증을 주고 받기 위한 규칙이므로 프로토콜이라고 할 수 있다.
+
+Oauth2라는 프로토콜은 인증을 주고 받기 위해 아래 절차를 거친다.
+
+```
+A. 클라이언트가 인증을 요청한다.
+B. 사용자의 선택을 통해 권한을 부여한다. (인증 해도 돼라고 OK 사인을 준다)
+C. 액세스 토큰이 발급된다.
+D. API가 호출된다.
+```
+
+또한 Oauth2는 안전성을 위한 보안 규칙도 가지고 있다.
+
+```
+A. 토큰 기반 인증
+B. 사용자 정보 보호
+C. 범위(scope라고 한다) 설정
+```
+
+Oauth2를 구성하는 핵심 요소들은 아래와 같다.
+
+```
+A. 우선 특정 서비스에 특정 정보를 넘긴 상태의 사용자가 있어야 한다. -> Resource Owner
+B. 사용자가 이용하고 있는 서비스가 있어야 한다. -> Client
+C. 지금 이용하는 서비스 외에, 인증을 요청할 서버가 있어야 한다. -> Authorization Server
+D. 사용자가 정보를 가지고 있는 서버가 있어야 한다.
+E. 해당 정보에 접근하기 위한 인증 수단이 있어야 한다.
+```
+
+위 요소들을 가지고 Oauth2가 담당하는 기능인 '인증' 의 흐름을 아래와 같이 정리할 수 있다.
+
+```
+A. 사용자 우리의 서비스에서 로그인 요청을 하고, 카카오 인증 서버에서 인증에 동의를 한다.
+B. Autorization Token을 발행한다.
+C. Access Token을 요청한다.
+D. 사용자 정보를 요청한다.
+E. 받아온 정보를 가지고 로그인을 처리한다.
+```
+
+# 3. 그래서 Oahth2를 사용하려면 뭐가 필요한데?
+
+스프링부트를 사용한다고 하면 아래 기술 스택이 필요하다.
+
+```
+A. spring-boot_starter-oauth2-client
+B. spring-security-oauth2-client
+C. application.yml 혹은 properties 설정
+```
+
+1. spring-boot_starter-oauth2-client은 Spring Security 기반 라이브러리이다. 사용하려면 build.gradle이나 application.yml 혹은 application.properties를 설정해야 한다.
+
+``` spring-boot_starter-oauth2-client 설정 코드(일단 챗GPT 통해서 빠르게 수집함)
+아래 코드는 YAML(Ain't Markup Language)이라는 양식으로, 들여쓰기로 계층 구조를 표현하는 파일 설정 형식이라고 한다.
+들여쓰기를 할 때, tab 키가 아닌 space 2번을 반드시 적어야 한다.
+
+spring: << 모든 스프링 관련 설정은 이 아래로 들어간다.
+  security: << Spring Security라는, 
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: [클라이언트 ID]
+            client-secret: [클라이언트 시크릿]
+            scope:
+              - email
+              - profile
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+```
