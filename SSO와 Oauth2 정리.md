@@ -77,23 +77,23 @@ C. application.yml 혹은 properties 설정
 1. spring-boot_starter-oauth2-client은 Spring Security 기반 라이브러리이다. 사용하려면 build.gradle이나 application.yml 혹은 application.properties를 설정해야 한다.
 
 ``` spring-boot_starter-oauth2-client 설정 코드(일단 챗GPT 통해서 빠르게 수집함)
-아래 코드는 YAML(Ain't Markup Language)이라는 양식으로, 들여쓰기로 계층 구조를 표현하는 파일 설정 형식이라고 한다.
+아래 코드는 YAML(Ain't Markup Language)이라는 양식으로, 들여쓰기로 계층 구조를 표현하는 파일 설정 형식이라고 한다. 즉 내려갈 수록 하위 계층이라고 생각하면 된다.
 들여쓰기를 할 때, tab 키가 아닌 space 2번을 반드시 적어야 한다.
 
 spring: << 모든 스프링 관련 설정은 이 아래로 들어간다.
-  security: << Spring Security라는, 
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: [클라이언트 ID]
-            client-secret: [클라이언트 시크릿]
-            scope:
-              - email
-              - profile
-        provider:
-          google:
-            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
-            token-uri: https://oauth2.googleapis.com/token
-            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+  security: << Spring Security라는 보안 프레임워크이다. 로그인/로그아웃, 권한 부여, 인증/인가 등의 기능 구현을 돕는 라이브러리이다.
+    oauth2: << Oauth2 관련 설정 영역을 가리킨다. 소셜 로그인, 외부 인증 등을 사용할 때 필요하다.
+      client: << 이 앱이 Oauth2 구조에서 클라이언트(요청자) 역할을 한다는 의미이다. 외부 서비스에 로그인해 정보를 받아올 것이다.
+        registration: << 여기 하위부터 어떤 인증 제공자에 대해 로그인을 요청할지 등록해야 한다. 구체적인 서비스명 및 코드가 시작된다.
+          google: << 구글 설정 블록. Spring이 기본적으로 이해할 수 있는 키워드이다. 내부적으로 구글 Oauth2 제공자에 연결해준다.
+            client-id: [클라이언트 ID] 구글 API 콘솔에서 발급받은 OAuth2 클라이언트 ID를 적는다. 저기로 가서 앱 등록을 해야 한다.
+            client-secret: [클라이언트 시크릿] << 같은 방식으로 발급받는 클라이언트 비밀번호. 위 id랑 같이 github에 노출되면 안됨.
+            scope: << 사용자가 OAuth2를 통해 어떤 정보를 제공받을지 하위에 적는다. 동의 화면에 아래 정보들 수집한다고 뜬다고 함.
+              - email << 이메일. 구글은 기본으로 제공한다고 함
+              - profile << 프로필. 구글은 기본으로 제공한다고 함
+        provider: << OAuth2 제공자에 대한 추가 설정이 필요할 때 사용한다. 자동으로 설정하는 주소 말고 다른 주소를 명시할 수 있음
+          google: << 어느 서비스에 대한 것인지. 위 registration에 명시된 서비스명과 일치해야 한다.
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth << 사용자 로그인할 때 이동하게 될 인증 URL(리디렉션)
+            token-uri: https://oauth2.googleapis.com/token << 로그인 후(인증 마친 후), 서버가 액세스 토큰을 받기 위해 요청할 주소
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo << 필요한 정보 요청할 주소. 이 API를 통해 받아온다고 함
 ```
