@@ -64,7 +64,7 @@ D. 사용자 정보를 요청한다.
 E. 받아온 정보를 가지고 로그인을 처리한다.
 ```
 
-# 3. 그래서 Oahth2를 사용하려면 뭐가 필요한데?
+# 3. 그래서 Oauth2를 사용하려면 뭐가 필요한데?
 
 스프링부트를 사용한다고 하면 아래 기술 스택이 필요하다.
 
@@ -96,4 +96,27 @@ spring: << 모든 스프링 관련 설정은 이 아래로 들어간다.
             authorization-uri: https://accounts.google.com/o/oauth2/v2/auth << 사용자 로그인할 때 이동하게 될 인증 URL(리디렉션)
             token-uri: https://oauth2.googleapis.com/token << 로그인 후(인증 마친 후), 서버가 액세스 토큰을 받기 위해 요청할 주소
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo << 필요한 정보 요청할 주소. 이 API를 통해 받아온다고 함
+```
+
+2. spring-security-oauth2-client는 OAuth2의 핵심 기능(클라이언트 인증 기능) 을 실제로 구현하는 JAVA의 클래스이자 라이브러리이다.
+
+``` spring-security-oauth2-client를 활용한 소셜로그인 기본 코드(어떻게 사용하는지 뜯어봐야 하며, 우리 서비스에는 코드 변형해서 넣어야겠지..?)
+
+@Configuration << 스프링 설정 파일임을 명시하는 어노테이션이다. Spring이 자동으로 스캔 및 적용시킴
+@EnableWebSecurity << 스프링 시큐리티를 활성화하겠다는 의미. 보안 관련 설정을 하겠다는 의미이기도 하다.
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/", "/login", "/css/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .oauth2Login();
+
+        return http.build();
+    }
+}
+
 ```
