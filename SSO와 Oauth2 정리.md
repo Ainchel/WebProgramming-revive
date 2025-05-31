@@ -102,21 +102,46 @@ spring: << 모든 스프링 관련 설정은 이 아래로 들어간다.
 
 ``` spring-security-oauth2-client를 활용한 소셜로그인 기본 코드(어떻게 사용하는지 뜯어봐야 하며, 우리 서비스에는 코드 변형해서 넣어야겠지..?)
 
-@Configuration << 스프링 설정 파일임을 명시하는 어노테이션이다. Spring이 자동으로 스캔 및 적용시킴
-@EnableWebSecurity << 스프링 시큐리티를 활성화하겠다는 의미. 보안 관련 설정을 하겠다는 의미이기도 하다.
-public class SecurityConfig {
+@Configuration << 스프링 설정 클래스임을 명시하는 어노테이션이다. Spring이 자동으로 스캔하여 스프링 컨테이너에 자동 등록시킴
+@EnableWebSecurity << 스프링 시큐리티 수동 설정을 활성화하겠다는 의미. 보안 관련 설정을 하겠다는 의미이기도 하다.
+public class SecurityConfig { << 보안 설정 담당 클래스 선언
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/", "/login", "/css/**").permitAll()
-                .anyRequest().authenticated()
+    @Bean << 스프링이 관리하게 할 빈 객체를 등록하는 어노테이션
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception { << 스프링 시큐리티의 보안 설정을 구성하는 메소드. HttpSecurity 패러미터는 해당 웹 요청에서 어떤 보안 규칙을 적용할지 설정하는 물건이다.
+        http << 스프링 시큐리티에서 사용하는 보안 설정 객체. 이 객체를 통해 URL 별 인증, 로그인 방식 등을 설정할 수 있다.
+            .authorizeHttpRequests(authorize -> authorize << 요청을 허용 혹은 제한하겠다는 설정. URL별로 바로 접근시킬지, 로그인을 해야 할지 등의 규칙을 다음에 적는다.
+                .requestMatchers("/", "/login", "/css/**").permitAll() << 이 URL에는 아무나 접근할 수 있도록 허용한다는 의미. 각 패러미터들은 메인 페이지에서의 이후 URL들이다. 예시) www.example.com/, www.example.com/login, www.example.com/css/... 등.
+                .anyRequest().authenticated() << 위에 적어넣은 URL이 아닌 모든 요청을 로그인한 사용자만 접근 가능하도록 설정한다.
             )
-            .oauth2Login();
+            .oauth2Login(); << OAuth2의 외부 로그인 서비스와의 연동을 활성화한다.
 
-        return http.build();
+        return http.build(); << 메소드의 마지막으로 위 설정을 마친 결과물을 만들어 반환시킨다.
     }
 }
+```
 
+# 2-1. 위 메소드를 실제 호출하는 흐름 정리
+
+만약에 사용자가 www.example.com/mypage라는 URL에 접근하다고 치자.
+
+1. 스프링 시큐리티에서 로그인 상태를 체크한다. 로그인이 안 되어 있으면 카카오로 리디렉션 시킨다. 로그인이 되어 있다면 컨트롤러에서 실제 페이지를 반환한다.
+
+2. 컨트롤러에서의 예시 (코드는 챗GPT에게 요청)
+
+```
+@Controller
+public class MainController {
+
+    @GetMapping("/")
+    public String home() {
+        return "home";  // 누구나 접근 가능
+    }
+
+    @GetMapping("/mypage")
+    public String myPage(Principal principal, Model model) {
+        // principal 객체는 인증된 사용자 정보
+        model.addAttribute("username", principal.getName());
+        return "mypage";  // 인증된 사용자만 접근 가능
+    }
+}
 ```
